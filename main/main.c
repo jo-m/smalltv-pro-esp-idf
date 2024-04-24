@@ -74,8 +74,11 @@ void app_main(void) {
     ESP_LOGI(TAG, "Display LVGL animation");
     lvgl_dummy_ui(disp);
 
+    uint8_t c = 0;
     while (1) {
         uint32_t time_till_next_ms = lv_timer_handler();
         vTaskDelay(pdMS_TO_TICKS(time_till_next_ms));
+
+        backlight_set_brightness(c++);
     }
 }

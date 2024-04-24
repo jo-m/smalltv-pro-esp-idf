@@ -6,6 +6,7 @@
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #include <driver/spi_master.h>
 #pragma GCC diagnostic pop
+#include <driver/ledc.h>
 #include <esp_lcd_panel_ops.h>
 #include <esp_lcd_panel_vendor.h>
 #include <esp_log.h>
@@ -13,12 +14,33 @@
 
 static const char *TAG = "lcd";
 
+#define BL_LEDC_TIMER LEDC_TIMER_0
+#define BL_LEDC_MODE LEDC_LOW_SPEED_MODE
+#define BL_LEDC_CHANNEL LEDC_CHANNEL_0
+#define BL_LEDC_DUTY_RES LEDC_TIMER_8_BIT
+#define BL_LEDC_FREQUENCY (4000)
+
 esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out) {
     ESP_LOGI(TAG, "Configure LCD backlight");
-    gpio_config_t bk_gpio_config = {.mode = GPIO_MODE_OUTPUT,
-                                    .pin_bit_mask = 1ULL << CONFIG_SMALLTV_LCD_BL_PIN};
-    ESP_ERROR_CHECK(gpio_config(&bk_gpio_config));
-    backlight_onoff(false);
+    ledc_timer_config_t ledc_timer = {.speed_mode = BL_LEDC_MODE,
+                                      .duty_resolution = BL_LEDC_DUTY_RES,
+                                      .timer_num = BL_LEDC_TIMER,
+                                      .freq_hz = BL_LEDC_FREQUENCY,
+                                      .clk_cfg = LEDC_AUTO_CLK};
+    ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
+    ledc_channel_config_t ledc_channel = {
+        .gpio_num = CONFIG_SMALLTV_LCD_BL_PIN,
+        .speed_mode = BL_LEDC_MODE,
+        .channel = BL_LEDC_CHANNEL,
+        .intr_type = LEDC_INTR_DISABLE,
+        .timer_sel = BL_LEDC_TIMER,
+        .duty = 0,
+        .hpoint = 0,
+        .flags.output_invert = 1,
+    };
+    ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
+    ESP_ERROR_CHECK(ledc_update_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL));
+    backlight_set_brightness(0);
 
     ESP_LOGI(TAG, "Initialize SPI bus");
     spi_bus_config_t buscfg = {
@@ -64,23 +86,19 @@ esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out) {
     ESP_ERROR_CHECK(esp_lcd_panel_set_gap(panel_handle, 0, 0));
     ESP_ERROR_CHECK(esp_lcd_panel_swap_xy(panel_handle, false));
 
-    backlight_onoff(true);
-
     assert(panel_handle_out != NULL);
     *panel_handle_out = panel_handle;
+
+    backlight_set_brightness(255);
+
     return ESP_OK;
 }
 
-esp_err_t backlight_onoff(bool enable) {
-    // TODO: use SMALLTV_LCD_BL_PWM_CHANNEL to dim.
+esp_err_t backlight_set_brightness(uint8_t duty) {
+    ESP_LOGI(TAG, "Backlight duty cycle: %hhu", duty);
 
-    ESP_LOGI(TAG, "Backlight onoff: %d", enable);
-
-    if (enable) {
-        ESP_ERROR_CHECK(gpio_set_level(CONFIG_SMALLTV_LCD_BL_PIN, CONFIG_SMALLTV_LCD_BL_ON_LEVEL));
-    } else {
-        ESP_ERROR_CHECK(gpio_set_level(CONFIG_SMALLTV_LCD_BL_PIN, CONFIG_SMALLTV_LCD_BL_OFF_LEVEL));
-    }
+    ledc_set_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL, duty);
+    ledc_update_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL);
 
     return ESP_OK;
 }
