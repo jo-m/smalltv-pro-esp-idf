@@ -1,0 +1,8 @@
+menu "Smalltv LCD"
+
+    config SMALLTV_TOUCH_PIN
+        prompt "Capacitive touch button pin (GPIO)"
+        int
+        default 32
+
+endmenu

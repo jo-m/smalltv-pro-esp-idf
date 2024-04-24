@@ -1,0 +1,27 @@
+dependencies:
+  espressif/esp_jpeg:
+    component_hash: 257714f4bd0d8258a122d57715e6ba166de858d6d49d5fb8e70263d5069d8568
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 1.0.5~2
+  espressif/mdns:
+    component_hash: 9ff9c578fc3a5ea3c68e807233e47f2ce6b2492a92d7a9356ae5c29ab45f0fde
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 1.3.0
+  idf:
+    component_hash: null
+    source:
+      type: idf
+    version: 5.2.1
+  lvgl/lvgl:
+    component_hash: 2a8f619b5c2b1c7ad116c33d43dae8989c76739068f406a7e8ba9221e1085f17
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 9.1.0
+manifest_hash: 098418fc8095387f46e727f0788205f42c5d4f1bd47b6ced5af3467e82ac951d
+target: esp32
+version: 1.0.0

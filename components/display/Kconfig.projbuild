@@ -1,0 +1,63 @@
+menu "Smalltv LCD"
+
+    config SMALLTV_LCD_RST_PIN
+        prompt "RST pin (GPIO)"
+        int
+        default 4
+
+    menu "SPI"
+
+        config SMALLTV_LCD_MAX_TRANSFER_LINES
+            prompt "How many pixel lines to transfer via SPI max at once"
+            int
+            default 80
+            help
+                SMALLTV_LCD_V_RES should be a multiple of this.
+
+        config SMALLTV_LCD_PX_CLK_MHZ
+            prompt "Pixel clock MHz"
+            int
+            default 40
+
+        config SMALLTV_LCD_SPI_MOSI_PIN
+            prompt "LCD MOSI pin (GPIO)"
+            int
+            default 23
+
+        config SMALLTV_LCD_SPI_SCLK_PIN
+            prompt "LCD SCLK pin (GPIO)"
+            int
+            default 18
+
+        config SMALLTV_LCD_SPI_DC_PIN
+            prompt "LCD DC pin (GPIO)"
+            int
+            default 2
+
+    endmenu
+
+    menu "Backlight"
+
+        config SMALLTV_LCD_BL_PIN
+            prompt "Pin (GPIO)"
+            int
+            default 25
+
+        config SMALLTV_LCD_BL_PWM_CHANNEL
+            prompt "PWM channel"
+            int
+            default 0
+
+        config SMALLTV_LCD_BL_ON_LEVEL
+            prompt "On level"
+            int
+            default 0
+
+        config SMALLTV_LCD_BL_OFF_LEVEL
+            prompt "Off level"
+            int
+            default 1
+
+    endmenu
+
+endmenu
