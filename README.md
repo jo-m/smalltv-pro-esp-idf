@@ -1,5 +1,7 @@
 # SmallTv-Pro ESP-IDF Sample Project
 
+![Demo](demo.gif)
+
 Minimal ESP-IDF 5 sample project, demonstrating how to set up and control the 240x240 LCD display of the Smalltv-Pro device.
 Starting point to write your own project to run on this cute hardware.
 
