@@ -6,6 +6,8 @@ Minimal ESP-IDF 5 sample project, demonstrating how to set up and control the 24
 Starting point to write your own project to run on this cute hardware.
 
 ```bash
+source $IDF_PATH/export.sh
+
 # Build/flash
 idf.py build flash
 ```
