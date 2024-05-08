@@ -26,16 +26,18 @@ void lvgl_dummy_ui(lv_display_t *disp) {
 
     // Text label
     lv_obj_t *label = lv_label_create(scr);
-
     lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_label_set_text(label, "Hello Espressif, Hello LVGL. This must be a bit longer to scoll.");
-
     lv_obj_set_width(label, 240);
     lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0);
 
     // Animation
     lv_obj_t *obj = lv_obj_create(scr);
-    lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_RED), 0);
+    lv_color_t red = LV_COLOR_MAKE(255, 0, 0);
+    lv_obj_set_style_bg_color(obj, red, 0);
+    lv_color_t grn = LV_COLOR_MAKE(0, 255, 0);
+    lv_obj_set_style_border_color(obj, grn, 0);
+    lv_obj_set_style_border_width(obj, 5, 0);
     lv_obj_set_style_radius(obj, LV_RADIUS_CIRCLE, 0);
 
     lv_obj_align(obj, LV_ALIGN_LEFT_MID, 10, 0);
@@ -52,7 +54,6 @@ void lvgl_dummy_ui(lv_display_t *disp) {
     lv_anim_set_path_cb(&a, lv_anim_path_ease_in_out);
 
     lv_anim_set_exec_cb(&a, anim_size_cb);
-    lv_anim_start(&a);
     lv_anim_set_exec_cb(&a, anim_x_cb);
     lv_anim_set_values(&a, 10, 240);
     lv_anim_start(&a);
