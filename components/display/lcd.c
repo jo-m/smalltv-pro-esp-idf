@@ -71,7 +71,7 @@ esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out) {
         .lcd_cmd_bits = SMALLTV_LCD_CMD_BITS,
         .lcd_param_bits = SMALLTV_LCD_PARAM_BITS,
         .spi_mode = 3,
-        .trans_queue_depth = 10,
+        .trans_queue_depth = 5,
     };
     ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)SMALLTV_LCD_SPI_HOST,
                                              &io_config, &io_handle));
