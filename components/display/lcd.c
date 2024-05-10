@@ -20,7 +20,7 @@ static const char *TAG = "lcd";
 #define BL_LEDC_DUTY_RES LEDC_TIMER_8_BIT
 #define BL_LEDC_FREQUENCY (4000)
 
-esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out) {
+static void setup_backlight_pwm() {
     ESP_LOGI(TAG, "Configure LCD backlight");
     ledc_timer_config_t ledc_timer = {.speed_mode = BL_LEDC_MODE,
                                       .duty_resolution = BL_LEDC_DUTY_RES,
@@ -40,6 +40,13 @@ esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out) {
     };
     ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
     ESP_ERROR_CHECK(ledc_update_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL));
+}
+
+esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out) {
+    assert(panel_handle_out != NULL);
+    assert(io_handle_out != NULL);
+
+    setup_backlight_pwm();
     backlight_set_brightness(0);
 
     ESP_LOGI(TAG, "Initialize SPI bus");
