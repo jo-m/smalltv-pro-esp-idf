@@ -41,9 +41,9 @@ esp_err_t display_init(esp_lcd_panel_handle_t panel_handle,
 
     ESP_LOGI(TAG, "Allocate display buffer(s)");
     const size_t buf_sz = SMALLTV_LCD_H_RES * SMALLTV_LCD_V_RES * SMALLTV_LCD_COLOR_DEPTH_BYTE / 3;
-    _Static_assert(buf_sz == CONFIG_SMALLTV_LCD_MAX_TRANSFER_LINES * SMALLTV_LCD_H_RES *
+    _Static_assert(buf_sz <= CONFIG_SMALLTV_LCD_MAX_TRANSFER_LINES * SMALLTV_LCD_H_RES *
                                  SMALLTV_LCD_COLOR_DEPTH_BYTE,
-                   "Should be equal to buscfg.max_transfer_sz");
+                   "Should be <= buscfg.max_transfer_sz");
     ESP_LOGI(TAG, "Buf size: %u", buf_sz);
     lv_color_t *buf0 = heap_caps_malloc(buf_sz, MALLOC_CAP_DMA);
     assert(buf0);
