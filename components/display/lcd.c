@@ -42,10 +42,8 @@ static void setup_backlight_pwm() {
     ESP_ERROR_CHECK(ledc_update_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL));
 }
 
-esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out) {
-    assert(panel_handle_out != NULL);
-    assert(io_handle_out != NULL);
-
+esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out,
+                   esp_lcd_panel_io_handle_t *panel_io_handle_out) {
     setup_backlight_pwm();
     backlight_set_brightness(0);
 
@@ -63,7 +61,7 @@ esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out) {
     ESP_ERROR_CHECK(spi_bus_initialize(SMALLTV_LCD_SPI_HOST, &buscfg, SPI_DMA_CH_AUTO));
 
     ESP_LOGI(TAG, "Attach LCD panel to SPI bus");
-    esp_lcd_panel_io_handle_t io_handle = NULL;
+    esp_lcd_panel_io_handle_t panel_io_handle = NULL;
     esp_lcd_panel_io_spi_config_t io_config = {
         .dc_gpio_num = CONFIG_SMALLTV_LCD_SPI_DC_PIN,
         .cs_gpio_num = -1,  // Not connected, tied to GND
@@ -74,7 +72,7 @@ esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out) {
         .trans_queue_depth = 5,
     };
     ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)SMALLTV_LCD_SPI_HOST,
-                                             &io_config, &io_handle));
+                                             &io_config, &panel_io_handle));
 
     ESP_LOGI(TAG, "Create St7789 LCD panel");
     esp_lcd_panel_dev_config_t panel_config = {
@@ -86,7 +84,7 @@ esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out) {
         .vendor_config = NULL,
     };
     esp_lcd_panel_handle_t panel_handle;
-    ESP_ERROR_CHECK(esp_lcd_new_panel_st7789(io_handle, &panel_config, &panel_handle));
+    ESP_ERROR_CHECK(esp_lcd_new_panel_st7789(panel_io_handle, &panel_config, &panel_handle));
 
     ESP_LOGI(TAG, "Initialize LCD panel");
     ESP_ERROR_CHECK(esp_lcd_panel_reset(panel_handle));
@@ -96,10 +94,12 @@ esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out) {
     ESP_ERROR_CHECK(esp_lcd_panel_set_gap(panel_handle, 0, 0));
     ESP_ERROR_CHECK(esp_lcd_panel_swap_xy(panel_handle, false));
 
-    assert(panel_handle_out != NULL);
-    *panel_handle_out = panel_handle;
-
     backlight_set_brightness(255);
+
+    assert(panel_handle_out != NULL);
+    assert(panel_io_handle_out != NULL);
+    *panel_handle_out = panel_handle;
+    *panel_io_handle_out = panel_io_handle;
 
     return ESP_OK;
 }

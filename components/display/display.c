@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <esp_heap_caps.h>
+#include <esp_lcd_panel_io.h>
 #include <esp_lcd_panel_ops.h>
 #include <esp_log.h>
 #include <esp_system.h>
@@ -20,13 +21,20 @@ static void lcd_flush_cb(lv_display_t *disp, const lv_area_t *area, uint8_t *px_
     ESP_ERROR_CHECK(esp_lcd_panel_draw_bitmap(panel_handle, x1, y1, x2 + 1, y2 + 1, px_map));
 
     ESP_LOGD(TAG, "lcd_flush_cb() x1=%d y1=%d x2=%d y2=%d", x1, y1, x2, y2);
-
-    lv_display_flush_ready(disp);
 }
 
 static uint32_t lcd_lvgl_tick_get_cb() { return esp_timer_get_time() / 1000; }
 
-esp_err_t display_init(esp_lcd_panel_handle_t panel_handle, lv_display_t **disp_out) {
+bool color_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata,
+                         void *user_ctx) {
+    lv_display_t *disp = (lv_display_t *)user_ctx;
+    lv_display_flush_ready(disp);
+
+    return true;  // TODO: not sure about this.
+}
+
+esp_err_t display_init(esp_lcd_panel_handle_t panel_handle,
+                       esp_lcd_panel_io_handle_t panel_io_handle, lv_display_t **disp_out) {
     ESP_LOGI(TAG, "Initialize LVGL library");
     lv_init();
     lv_tick_set_cb(lcd_lvgl_tick_get_cb);
@@ -50,6 +58,12 @@ esp_err_t display_init(esp_lcd_panel_handle_t panel_handle, lv_display_t **disp_
     lv_display_set_flush_cb(disp, lcd_flush_cb);
     lv_display_set_buffers(disp, buf0, buf1, buf_sz, LV_DISPLAY_RENDER_MODE_PARTIAL);
     lv_display_set_color_format(disp, SMALLTV_LCD_COLOR_FORMAT);
+
+    // Register IO done callback.
+    const esp_lcd_panel_io_callbacks_t cbs = {
+        .on_color_trans_done = color_trans_done_cb,
+    };
+    esp_lcd_panel_io_register_event_callbacks(panel_io_handle, &cbs, (void *)disp);
 
     assert(disp_out != NULL);
     *disp_out = disp;
