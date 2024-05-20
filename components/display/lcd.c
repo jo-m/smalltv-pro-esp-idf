@@ -7,6 +7,7 @@
 #include <driver/spi_master.h>
 #pragma GCC diagnostic pop
 #include <driver/ledc.h>
+#include <esp_err.h>
 #include <esp_lcd_panel_ops.h>
 #include <esp_lcd_panel_vendor.h>
 #include <esp_log.h>
@@ -42,8 +43,8 @@ static void setup_backlight_pwm() {
     ESP_ERROR_CHECK(ledc_update_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL));
 }
 
-esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out,
-                   esp_lcd_panel_io_handle_t *panel_io_handle_out) {
+void lcd_init(esp_lcd_panel_handle_t *panel_handle_out,
+              esp_lcd_panel_io_handle_t *panel_io_handle_out) {
     setup_backlight_pwm();
     backlight_set_brightness(0);
 
@@ -100,15 +101,11 @@ esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out,
     assert(panel_io_handle_out != NULL);
     *panel_handle_out = panel_handle;
     *panel_io_handle_out = panel_io_handle;
-
-    return ESP_OK;
 }
 
-esp_err_t backlight_set_brightness(uint8_t duty) {
+void backlight_set_brightness(uint8_t duty) {
     ESP_LOGI(TAG, "Backlight duty cycle: %hhu", duty);
 
-    ledc_set_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL, duty);
-    ledc_update_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL);
-
-    return ESP_OK;
+    ESP_ERROR_CHECK(ledc_set_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL, duty));
+    ESP_ERROR_CHECK(ledc_update_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL));
 }

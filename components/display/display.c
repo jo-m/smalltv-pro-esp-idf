@@ -1,6 +1,7 @@
 #include "display.h"
 
 #include <assert.h>
+#include <esp_err.h>
 #include <esp_heap_caps.h>
 #include <esp_lcd_panel_io.h>
 #include <esp_lcd_panel_ops.h>
@@ -33,8 +34,8 @@ bool color_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_ev
     return true;  // TODO: not sure about this.
 }
 
-esp_err_t display_init(esp_lcd_panel_handle_t panel_handle,
-                       esp_lcd_panel_io_handle_t panel_io_handle, lv_display_t **disp_out) {
+void display_init(esp_lcd_panel_handle_t panel_handle, esp_lcd_panel_io_handle_t panel_io_handle,
+                  lv_display_t **disp_out) {
     ESP_LOGI(TAG, "Initialize LVGL library");
     lv_init();
     lv_tick_set_cb(lcd_lvgl_tick_get_cb);
@@ -59,14 +60,12 @@ esp_err_t display_init(esp_lcd_panel_handle_t panel_handle,
     lv_display_set_buffers(disp, buf0, buf1, buf_sz, LV_DISPLAY_RENDER_MODE_PARTIAL);
     lv_display_set_color_format(disp, SMALLTV_LCD_COLOR_FORMAT);
 
-    // Register IO done callback.
+    ESP_LOGI(TAG, "Register IO done callback");
     const esp_lcd_panel_io_callbacks_t cbs = {
         .on_color_trans_done = color_trans_done_cb,
     };
-    esp_lcd_panel_io_register_event_callbacks(panel_io_handle, &cbs, (void *)disp);
+    ESP_ERROR_CHECK(esp_lcd_panel_io_register_event_callbacks(panel_io_handle, &cbs, (void *)disp));
 
     assert(disp_out != NULL);
     *disp_out = disp;
-
-    return ESP_OK;
 }

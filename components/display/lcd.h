@@ -1,6 +1,5 @@
 #pragma once
 
-#include <esp_err.h>
 #include <esp_lcd_types.h>
 #include <stdint.h>
 
@@ -16,6 +15,6 @@
 #define SMALLTV_LCD_CMD_BITS 8
 #define SMALLTV_LCD_PARAM_BITS 8
 
-esp_err_t lcd_init(esp_lcd_panel_handle_t *panel_handle_out,
-                   esp_lcd_panel_io_handle_t *panel_io_handle_out);
-esp_err_t backlight_set_brightness(uint8_t duty);
+void lcd_init(esp_lcd_panel_handle_t *panel_handle_out,
+              esp_lcd_panel_io_handle_t *panel_io_handle_out);
+void backlight_set_brightness(uint8_t duty);
