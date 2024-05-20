@@ -65,12 +65,13 @@ void app_main(void) {
     ESP_LOGI(TAG, "Initialize LCD");
     esp_lcd_panel_handle_t panel_handle = NULL;
     esp_lcd_panel_io_handle_t panel_io_handle = NULL;
-    lcd_init(&panel_handle, &panel_io_handle);
+    init_lcd(&panel_handle, &panel_io_handle);
     assert(panel_handle != NULL);
+    assert(panel_io_handle != NULL);
 
     ESP_LOGI(TAG, "Initialize display");
     lv_display_t *disp = NULL;
-    display_init(panel_handle, panel_io_handle, &disp);
+    init_display(panel_handle, panel_io_handle, &disp);
     assert(disp != NULL);
 
     ESP_LOGI(TAG, "Display LVGL animation");
@@ -81,6 +82,6 @@ void app_main(void) {
         uint32_t time_till_next_ms = lv_timer_handler();
         vTaskDelay(pdMS_TO_TICKS(time_till_next_ms));
 
-        backlight_set_brightness(c++);
+        lcd_backlight_set_brightness(c++);
     }
 }

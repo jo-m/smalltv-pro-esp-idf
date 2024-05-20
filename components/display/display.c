@@ -34,7 +34,7 @@ bool color_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_ev
     return true;  // TODO: not sure about this.
 }
 
-void display_init(esp_lcd_panel_handle_t panel_handle, esp_lcd_panel_io_handle_t panel_io_handle,
+void init_display(esp_lcd_panel_handle_t panel_handle, esp_lcd_panel_io_handle_t panel_io_handle,
                   lv_display_t **disp_out) {
     ESP_LOGI(TAG, "Initialize LVGL library");
     lv_init();
