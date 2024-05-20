@@ -1,9 +1,6 @@
 #pragma once
 
-#include <esp_err.h>
-#include <esp_lcd_types.h>
-
+#include "lcd.h"
 #include "lvgl.h"
 
-void init_display(esp_lcd_panel_handle_t panel_handle, esp_lcd_panel_io_handle_t panel_io_handle,
-                  lv_display_t **disp_out);
+void init_display(lcd_t *lcd, lv_display_t **disp_out);

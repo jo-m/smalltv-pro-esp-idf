@@ -43,8 +43,7 @@ static void setup_backlight_pwm() {
     ESP_ERROR_CHECK(ledc_update_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL));
 }
 
-void init_lcd(esp_lcd_panel_handle_t *panel_handle_out,
-              esp_lcd_panel_io_handle_t *panel_io_handle_out) {
+void init_lcd(lcd_t *lcd_out) {
     setup_backlight_pwm();
     lcd_backlight_set_brightness(0);
 
@@ -97,10 +96,11 @@ void init_lcd(esp_lcd_panel_handle_t *panel_handle_out,
 
     lcd_backlight_set_brightness(255);
 
-    assert(panel_handle_out != NULL);
-    assert(panel_io_handle_out != NULL);
-    *panel_handle_out = panel_handle;
-    *panel_io_handle_out = panel_io_handle;
+    ESP_LOGI(TAG, "Assign outputs");
+    assert(lcd_out != NULL);
+    memset(lcd_out, 0, sizeof(*lcd_out));
+    lcd_out->panel_handle = panel_handle;
+    lcd_out->panel_io_handle = panel_io_handle;
 }
 
 void lcd_backlight_set_brightness(uint8_t duty) {

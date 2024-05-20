@@ -63,15 +63,12 @@ void app_main(void) {
     ESP_LOGI(TAG, "app_main()");
 
     ESP_LOGI(TAG, "Initialize LCD");
-    esp_lcd_panel_handle_t panel_handle = NULL;
-    esp_lcd_panel_io_handle_t panel_io_handle = NULL;
-    init_lcd(&panel_handle, &panel_io_handle);
-    assert(panel_handle != NULL);
-    assert(panel_io_handle != NULL);
+    lcd_t lcd = {0};
+    init_lcd(&lcd);
 
     ESP_LOGI(TAG, "Initialize display");
     lv_display_t *disp = NULL;
-    init_display(panel_handle, panel_io_handle, &disp);
+    init_display(&lcd, &disp);
     assert(disp != NULL);
 
     ESP_LOGI(TAG, "Display LVGL animation");

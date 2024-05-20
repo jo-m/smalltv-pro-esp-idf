@@ -14,12 +14,12 @@
 static const char *TAG = "display";
 
 static void lcd_flush_cb(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map) {
-    esp_lcd_panel_handle_t panel_handle = (esp_lcd_panel_handle_t)lv_display_get_user_data(disp);
+    lcd_t *lcd = (lcd_t *)lv_display_get_user_data(disp);
     int x1 = area->x1;
     int x2 = area->x2;
     int y1 = area->y1;
     int y2 = area->y2;
-    ESP_ERROR_CHECK(esp_lcd_panel_draw_bitmap(panel_handle, x1, y1, x2 + 1, y2 + 1, px_map));
+    ESP_ERROR_CHECK(esp_lcd_panel_draw_bitmap(lcd->panel_handle, x1, y1, x2 + 1, y2 + 1, px_map));
 
     ESP_LOGD(TAG, "lcd_flush_cb() x1=%d y1=%d x2=%d y2=%d", x1, y1, x2, y2);
 }
@@ -34,8 +34,7 @@ bool color_trans_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_ev
     return true;  // TODO: not sure about this.
 }
 
-void init_display(esp_lcd_panel_handle_t panel_handle, esp_lcd_panel_io_handle_t panel_io_handle,
-                  lv_display_t **disp_out) {
+void init_display(lcd_t *lcd, lv_display_t **disp_out) {
     ESP_LOGI(TAG, "Initialize LVGL library");
     lv_init();
     lv_tick_set_cb(lcd_lvgl_tick_get_cb);
@@ -55,7 +54,7 @@ void init_display(esp_lcd_panel_handle_t panel_handle, esp_lcd_panel_io_handle_t
 
     lv_display_t *disp = lv_display_create(SMALLTV_LCD_H_RES, SMALLTV_LCD_V_RES);
     assert(disp != NULL);
-    lv_display_set_user_data(disp, (void *)panel_handle);
+    lv_display_set_user_data(disp, (void *)lcd);
     lv_display_set_flush_cb(disp, lcd_flush_cb);
     lv_display_set_buffers(disp, buf0, buf1, buf_sz, LV_DISPLAY_RENDER_MODE_PARTIAL);
     lv_display_set_color_format(disp, SMALLTV_LCD_COLOR_FORMAT);
@@ -64,7 +63,8 @@ void init_display(esp_lcd_panel_handle_t panel_handle, esp_lcd_panel_io_handle_t
     const esp_lcd_panel_io_callbacks_t cbs = {
         .on_color_trans_done = color_trans_done_cb,
     };
-    ESP_ERROR_CHECK(esp_lcd_panel_io_register_event_callbacks(panel_io_handle, &cbs, (void *)disp));
+    ESP_ERROR_CHECK(
+        esp_lcd_panel_io_register_event_callbacks(lcd->panel_io_handle, &cbs, (void *)disp));
 
     assert(disp_out != NULL);
     *disp_out = disp;
