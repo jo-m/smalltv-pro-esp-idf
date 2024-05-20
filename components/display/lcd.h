@@ -19,17 +19,17 @@
 #define SMALLTV_LCD_CMD_BITS 8
 #define SMALLTV_LCD_PARAM_BITS 8
 
+// All struct members are private to the implementation.
 typedef struct lcd_t {
     esp_lcd_panel_handle_t panel_handle;
     esp_lcd_panel_io_handle_t panel_io_handle;
 
-    // Those fields are private to the implementation.
-    SemaphoreHandle_t _draw_sem;
-    StaticSemaphore_t _draw_sem_buf;
-    SemaphoreHandle_t _done_sem;
-    StaticSemaphore_t _done_sem_buf;
+    SemaphoreHandle_t drawing;
+    StaticSemaphore_t drawing_buf;
 } lcd_t;
 
 void init_lcd(lcd_t *lcd_out);
-
+void lcd_draw_start(lcd_t *lcd, int x_start, int y_start, int x_end, int y_end,
+                    const void *color_data);
+void lcd_draw_wait_finished(lcd_t *lcd);
 void lcd_backlight_set_brightness(uint8_t duty);

@@ -44,6 +44,20 @@ static void setup_backlight_pwm() {
     ESP_ERROR_CHECK(ledc_update_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL));
 }
 
+static bool io_done_cb(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata,
+                       void *user_ctx) {
+    ESP_LOGD(TAG, "io_done_cb()");
+
+    lcd_t *lcd = (lcd_t *)user_ctx;
+
+    BaseType_t result = xSemaphoreGive(lcd->drawing);
+    if (result != pdTRUE) {
+        ESP_ERROR_CHECK(ESP_ERR_INVALID_STATE);
+    }
+
+    return true;  // TODO: not sure about this.
+}
+
 void init_lcd(lcd_t *lcd_out) {
     setup_backlight_pwm();
     lcd_backlight_set_brightness(0);
@@ -102,10 +116,35 @@ void init_lcd(lcd_t *lcd_out) {
     memset(lcd_out, 0, sizeof(*lcd_out));
     lcd_out->panel_handle = panel_handle;
     lcd_out->panel_io_handle = panel_io_handle;
+
+    ESP_LOGI(TAG, "Register IO done callback");
+    lcd_out->drawing = xSemaphoreCreateBinaryStatic(&lcd_out->drawing_buf);
+    assert(lcd_out->drawing != NULL);
+    const esp_lcd_panel_io_callbacks_t cbs = {
+        .on_color_trans_done = io_done_cb,
+    };
+    ESP_ERROR_CHECK(
+        esp_lcd_panel_io_register_event_callbacks(panel_io_handle, &cbs, (void *)lcd_out));
+}
+
+void lcd_draw_start(lcd_t *lcd, int x_start, int y_start, int x_end, int y_end,
+                    const void *color_data) {
+    ESP_LOGD(TAG, "lcd_draw_start()");
+    ESP_ERROR_CHECK(esp_lcd_panel_draw_bitmap(lcd->panel_handle, x_start, y_start, x_end + 1,
+                                              y_end + 1, color_data));
+}
+
+void lcd_draw_wait_finished(lcd_t *lcd) {
+    ESP_LOGD(TAG, "lcd_draw_wait_finished()");
+
+    BaseType_t result = xSemaphoreTake(lcd->drawing, portMAX_DELAY);
+    if (result != pdTRUE) {
+        ESP_ERROR_CHECK(ESP_ERR_INVALID_STATE);
+    }
 }
 
 void lcd_backlight_set_brightness(uint8_t duty) {
-    ESP_LOGI(TAG, "Backlight duty cycle: %hhu", duty);
+    ESP_LOGI(TAG, "lcd_backlight_set_brightness(%hhu)", duty);
 
     ESP_ERROR_CHECK(ledc_set_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL, duty));
     ESP_ERROR_CHECK(ledc_update_duty(BL_LEDC_MODE, BL_LEDC_CHANNEL));
