@@ -1,2 +1,6 @@
 dependencies:
-  lvgl/lvgl: "^9.1.0"
+  # To include the fix for https://github.com/lvgl/lvgl/issues/6038.
+  # As soon as lvgl 9.2 is released, this can be replaced with `lvgl/lvgl: "^9.2.0"`
+  lvgl/lvgl:
+    version: b16aa3c558cc0aee2c02b1d043da9ae81597a194
+    git: https://github.com/lvgl/lvgl
