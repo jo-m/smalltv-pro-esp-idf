@@ -12,6 +12,7 @@
 #include <esp_lcd_panel_vendor.h>
 #include <esp_log.h>
 #include <stdbool.h>
+#include <string.h>
 
 static const char *TAG = "lcd";
 
