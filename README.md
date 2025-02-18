@@ -1,4 +1,8 @@
-# SmallTv-Pro ESP-IDF Sample Project
+# Archived
+
+Check out https://github.com/jo-m/netshlix instead.
+
+## SmallTv-Pro ESP-IDF Sample Project
 
 ![Demo](demo.gif)
 
